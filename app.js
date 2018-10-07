@@ -21,7 +21,7 @@ app.get('/', (req, res)=>{
 });
 
 app.get('/loaderio-ca02ab1b7f27113a28fd1181e1f74c8a', (req, res)=>{
-  res.sendFile(path.join(__dirname, './loaderio-ca02ab1b7f27113a28fd1181e1f74c8a.txt'));
+  res.sendFile(path.join(__dirname, '../api', './loaderio-ca02ab1b7f27113a28fd1181e1f74c8a.txt'));
 });
 
 app.use('/api', gradeRoutes);
