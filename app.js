@@ -19,6 +19,10 @@ app.get('/', (req, res)=>{
   res.send('ESL in the ROK API Main Page');
 });
 
+app.get('/loaderio-09eb528962d76d9f972ad3b3c38199ee', (req, res)=>{
+  res.sendFile('../api/loaderio-09eb528962d76d9f972ad3b3c38199ee.txt', {root: __dirname});
+});
+
 app.use('/api', gradeRoutes);
 app.use('/api/:gradeID/:bookID', bookRoutes);
 app.use('/api/:gradeID/:bookID', lessonRoutes);
