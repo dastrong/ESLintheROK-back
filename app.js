@@ -20,7 +20,7 @@ app.get('/', (req, res)=>{
   res.send('ESL in the ROK API Main Page');
 });
 
-app.get('/loaderio-ca02ab1b7f27113a28fd1181e1f74c8a', (req, res)=>{
+app.get('/loaderio-ca02ab1b7f27113a28fd1181e1f74c8a.txt', (req, res)=>{
   res.sendFile(path.join(__dirname, '../api', './loaderio-ca02ab1b7f27113a28fd1181e1f74c8a.txt'));
 });
 
