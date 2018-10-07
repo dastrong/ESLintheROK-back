@@ -1,7 +1,8 @@
 const express = require("express"),
       app     = express(),
       port    = process.env.PORT || 3000,
-      bodyParser = require("body-parser");
+      bodyParser = require("body-parser"),
+      path    = require("path");
 const gradeRoutes  = require('./routes/gradesR'),
       bookRoutes   = require('./routes/booksR'),
       lessonRoutes = require('./routes/lessonsR');
@@ -20,7 +21,7 @@ app.get('/', (req, res)=>{
 });
 
 app.get('/loaderio-ca02ab1b7f27113a28fd1181e1f74c8a', (req, res)=>{
-  res.sendFile('../api/loaderio-ca02ab1b7f27113a28fd1181e1f74c8a.txt', {root: __dirname});
+  res.sendFile(path.join(__dirname, './loaderio-ca02ab1b7f27113a28fd1181e1f74c8a.txt'));
 });
 
 app.use('/api', gradeRoutes);
