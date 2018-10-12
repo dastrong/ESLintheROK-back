@@ -37,7 +37,7 @@ function getBooks(req, res){
   .findOne({_id: req.params.gradeID})
   .populate({
     path: 'books',
-    select: ['publisher', 'author', 'imageURL'],
+    select: ['publisher', 'author', 'imageURL', 'lessons'],
   })
   .exec((err, books)=>{
     if(err) return res.send(err);
