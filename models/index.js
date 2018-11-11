@@ -3,7 +3,7 @@ const mongoose = require('mongoose'),
       Book     = require('./book'),
       Lesson   = require('./lesson'),
       DBurl    = process.env.NODE_ENV
-                  ? `mongodb://${process.env.DBuser}:${process.env.DBpw}@${process.env.DBip}:${process.env.DBport}/${process.env.DBname}`
+                  ? `mongodb://${process.env.DBuser}:${process.env.DBpw}@ds041167.mlab.com:41167/eslintherok`
                   : 'mongodb://localhost:27017/lessons-api';
       
 mongoose.set('debug', !process.env.NODE_ENV ? true : false);

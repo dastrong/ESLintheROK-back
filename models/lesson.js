@@ -3,16 +3,8 @@ const mongoose = require('mongoose');
 const LessonSchema = new mongoose.Schema({
   chapter: Number,
   title: String,
-  vocabulary: [{
-    text: String,
-    translation: String,
-    imageURL: String
-  }],
-  expressions: [{
-    text: String,
-    translation: String,
-    imageURL: String
-  }],
+  vocabulary: [String],
+  expressions: [String],
   created_date: {
     type: Date,
     default: Date.now
