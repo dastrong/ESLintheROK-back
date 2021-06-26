@@ -11,7 +11,6 @@ const DBurl = process.env.DBurl;
 
 mongoose.set('debug', isDev);
 mongoose.connect(DBurl, { useNewUrlParser: true, useUnifiedTopology: true });
-mongoose.Promise = Promise;
 
 app.use(cors());
 app.use(express.json());
