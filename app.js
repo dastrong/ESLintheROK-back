@@ -5,9 +5,9 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
 
-const gradeRoutes = require('./routes/gradesR');
-const bookRoutes = require('./routes/booksR');
-const lessonRoutes = require('./routes/lessonsR');
+const gradeRoutes = require('./routes/grades');
+const bookRoutes = require('./routes/books');
+const lessonRoutes = require('./routes/lessons');
 
 const isDev = process.env.NODE_ENV === 'dev';
 const port = process.env.PORT || 4000;
