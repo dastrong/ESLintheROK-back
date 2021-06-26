@@ -5,7 +5,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
 
-const bodyParser = require('body-parser');
 const gradeRoutes = require('./routes/gradesR');
 const bookRoutes = require('./routes/booksR');
 const lessonRoutes = require('./routes/lessonsR');
@@ -15,14 +14,14 @@ const port = process.env.PORT || 4000;
 const DBurl = process.env.DBurl;
 
 mongoose.set('debug', isDev);
-mongoose.connect(DBurl, { useNewUrlParser: true });
+mongoose.connect(DBurl, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.Promise = Promise;
 
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => res.send('ESL in the ROK API Main Page'));
+// app.get('/', (req, res) => res.send('ESL in the ROK API Main Page'));
 app.use('/api', gradeRoutes);
 app.use('/api/:gradeID/:bookID', bookRoutes);
 app.use('/api/:gradeID/:bookID', lessonRoutes);
