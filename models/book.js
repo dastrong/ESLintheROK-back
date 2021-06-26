@@ -2,16 +2,18 @@ const mongoose = require('mongoose');
 
 const BookSchema = new mongoose.Schema({
   publisher: String,
-  author:    String,
-  imageURL:  String,
+  author: String,
+  imageURL: String,
   grade: Number,
-  lessons: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Lesson'
-  }],
+  lessons: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Lesson',
+    },
+  ],
   created_date: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
 });
 
