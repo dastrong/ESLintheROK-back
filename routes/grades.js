@@ -1,79 +1,49 @@
-const express = require('express'),
-  router = express.Router(),
-  { Grade, Book } = require('../models');
+const express = require('express');
+const router = express.Router();
+const { Grade, Book } = require('../models');
 
-router.route('/').get(getGrades).post(createGrade);
+router.get('/grades', getAllGrades);
+router.post('/grade', createGrade);
+router.put('/grade/:gradeId', updateGrade);
+router.delete('/grade/:gradeId', deleteGrade);
+router.get('/grade/:gradeId/books', getGradeBooks);
 
-router
-  .route('/:gradeID')
-  .get(getBooks)
-  .post(createBook)
-  .put(updateGrade)
-  .delete(deleteGrade);
-
-function getGrades(req, res) {
+function getAllGrades(req, res, next) {
   Grade.find()
-    .then(grades => {
-      res.json(grades);
-    })
-    .catch(err => {
-      res.send(err);
-    });
+    .select('grade books')
+    .lean()
+    .then(grades => res.status(200).json(grades))
+    .catch(next);
 }
 
-function createGrade(req, res) {
+function createGrade(req, res, next) {
   Grade.create(req.body)
-    .then(newGrade => {
-      res.status(201).json(newGrade);
-    })
-    .catch(err => {
-      res.send(err);
-    });
+    .then(newGrade => res.status(201).json(newGrade))
+    .catch(next);
 }
 
-function getBooks(req, res) {
-  Grade.findOne({ _id: req.params.gradeID })
+function updateGrade(req, res, next) {
+  Grade.findOneAndUpdate({ _id: req.params.gradeId }, req.body, { new: true })
+    .then(() => res.status(200).json({ message: 'Successfully Updated' }))
+    .catch(next);
+}
+
+function deleteGrade(req, res, next) {
+  Grade.findOneAndDelete({ _id: req.params.gradeId })
+    .then(() => res.status(200).json({ message: 'Successfully Deleted' }))
+    .catch(next);
+}
+
+function getGradeBooks(req, res, next) {
+  Grade.findOne({ _id: req.params.gradeId })
+    .lean()
     .populate({
       path: 'books',
       select: ['publisher', 'author', 'imageURL', 'lessons'],
     })
     .exec((err, books) => {
-      if (err) return res.send(err);
-      res.json(books);
-    });
-}
-
-function createBook(req, res) {
-  Grade.findOne({ _id: req.params.gradeID }).then(grade => {
-    Book.create(req.body)
-      .then(newBook => {
-        grade.books.push(newBook);
-        grade.save();
-        res.status(201).json(grade);
-      })
-      .catch(err => {
-        res.send(err);
-      });
-  });
-}
-
-function updateGrade(req, res) {
-  Grade.findOneAndUpdate({ _id: req.params.gradeID }, req.body, { new: true })
-    .then(updatedGrade => {
-      res.send('Successfully Updated');
-    })
-    .catch(err => {
-      res.send(err);
-    });
-}
-
-function deleteGrade(req, res) {
-  Grade.findOneAndDelete({ _id: req.params.gradeID })
-    .then(() => {
-      res.send('Successfully Deleted');
-    })
-    .catch(err => {
-      res.send(err);
+      if (err) return next(err);
+      res.status(200).json(books);
     });
 }
 

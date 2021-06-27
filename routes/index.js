@@ -4,9 +4,9 @@ const bookRoutes = require('./books');
 const lessonRoutes = require('./lessons');
 
 module.exports = app => {
-  app.use('/api/grades', gradeRoutes);
-  app.use('/api/books', bookRoutes);
-  app.use('/api/lessons', lessonRoutes);
+  app.use('/api', gradeRoutes);
+  app.use('/api', bookRoutes);
+  app.use('/api', lessonRoutes);
 
   //catches all endpoints that don't exist above
   app.use((req, res, next) =>
