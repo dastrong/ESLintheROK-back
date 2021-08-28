@@ -9,6 +9,7 @@ router.delete('/grade/:gradeId', deleteGrade);
 router.get('/grade/:gradeId/books', getGradeBooks);
 
 function getAllGrades(req, res, next) {
+  console.log(req.cookies);
   Grade.find()
     .select('grade books')
     .lean()
