@@ -4,17 +4,17 @@ const FontSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
   },
-  fontFamily: {
+  fallback: {
     type: String,
     required: true,
-    unique: true,
   },
-  userIds: {
-    type: [String],
-    required: true,
-  },
+  userIds: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: 'User',
+    },
+  ],
 });
 
 const Font = mongoose.model('Font', FontSchema);
