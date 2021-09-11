@@ -1,6 +1,6 @@
-const express = require('express');
-const router = express.Router();
-const { Grade, Book } = require('../models');
+const router = require('express').Router();
+const Grade = require('../models/grade');
+const Book = require('../models/book');
 
 router.get('/grades', getAllGrades);
 router.post('/grade', createGrade);
@@ -9,7 +9,6 @@ router.delete('/grade/:gradeId', deleteGrade);
 router.get('/grade/:gradeId/books', getGradeBooks);
 
 function getAllGrades(req, res, next) {
-  console.log(req.cookies);
   Grade.find()
     .select('grade books')
     .lean()

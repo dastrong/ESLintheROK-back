@@ -1,7 +1,7 @@
-const express = require('express');
+const router = require('express').Router();
 const createError = require('http-errors');
-const router = express.Router();
-const { Book, Lesson } = require('../models');
+const Book = require('../models/book');
+const Lesson = require('../models/lesson');
 
 router.get('/lesson/:lessonId', getLessonData);
 router.post('/lesson/:lessonId', createLesson);
