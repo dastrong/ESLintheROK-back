@@ -12,11 +12,12 @@ module.exports = async function verifyToken(req, res, next) {
     }
 
     // fetch the session for the given accessToken
-    const { userId, expires } = await mongoose.connection.db
+    const session = await mongoose.connection.db
       .collection('sessions')
-      .findOne({ accessToken })
-      .then(({ userId, expires }) => ({ userId, expires }));
-    if (!userId || !expires) throw createError(400, 'Invalid Session');
+      .findOne({ accessToken });
+    if (!session) throw createError(400, 'Invalid Session');
+
+    const { userId, expires } = session;
 
     // check if the session has expired
     if (new Date(expires).valueOf() < new Date().valueOf()) {
