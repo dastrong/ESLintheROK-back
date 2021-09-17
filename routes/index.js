@@ -3,12 +3,14 @@ const gradeRoutes = require('./grades');
 const bookRoutes = require('./books');
 const lessonRoutes = require('./lessons');
 const fontRoutes = require('./fonts');
+const pastLessonRoutes = require('./pastlessons');
 
 module.exports = app => {
   app.use('/api', gradeRoutes);
   app.use('/api', bookRoutes);
   app.use('/api', lessonRoutes);
   app.use('/api', fontRoutes);
+  app.use('/api', pastLessonRoutes);
 
   //catches all endpoints that don't exist above
   app.use((req, res, next) =>
