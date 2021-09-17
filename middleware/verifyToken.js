@@ -11,6 +11,10 @@ module.exports = async function verifyToken(req, res, next) {
       throw createError(401, 'Incorrect Token Format');
     }
 
+    if (!mongoose.connection.db) {
+      throw createError(400, 'Error connecting to database');
+    }
+
     // fetch the session for the given accessToken
     const session = await mongoose.connection.db
       .collection('sessions')
