@@ -38,8 +38,9 @@ async function getUserPastLessons(req, res, next) {
 
     res.status(200).json(
       pastLessons.map(
-        ({ _id, vocabulary, expressions, expires, createdAt }) => ({
+        ({ _id, title, vocabulary, expressions, expires, createdAt }) => ({
           _id,
+          title,
           vocabularyCount: vocabulary.length,
           expressionsCount: expressions.length,
           expires,
@@ -55,7 +56,10 @@ async function getUserPastLessons(req, res, next) {
 async function createPastLesson(req, res, next) {
   try {
     const { userId } = res.locals;
-    const { vocabulary, expressions } = req.body;
+    const { title, vocabulary, expressions } = req.body;
+    if (!title) {
+      throw createError(400, 'Error creating past lesson (title)');
+    }
     if (!vocabulary) {
       throw createError(400, 'Error creating past lesson (vocabulary)');
     }
@@ -64,6 +68,7 @@ async function createPastLesson(req, res, next) {
     }
 
     const newPastLesson = await PastLesson.create({
+      title,
       vocabulary,
       expressions,
       ownerId: userId,
@@ -80,7 +85,7 @@ async function getPastLesson(req, res, next) {
     const { pastLessonId } = req.params;
 
     const pastLesson = await PastLesson.findOne({ _id: pastLessonId })
-      .select('vocabulary expressions')
+      .select('title vocabulary expressions createdAt')
       .lean();
     if (!pastLesson) {
       throw createError(400, `Error finding past lesson (${pastLessonId})`);
@@ -96,7 +101,10 @@ async function updatePastLesson(req, res, next) {
   try {
     const { userId } = res.locals;
     const { pastLessonId } = req.params;
-    const { vocabulary, expressions } = req.body;
+    const { title, vocabulary, expressions } = req.body;
+    if (!title) {
+      throw createError(400, 'Error updating past lesson (title)');
+    }
     if (!vocabulary) {
       throw createError(400, 'Error updating past lesson (vocabulary)');
     }
@@ -106,9 +114,11 @@ async function updatePastLesson(req, res, next) {
 
     const updatedPastLesson = await PastLesson.findOneAndUpdate(
       { _id: pastLessonId, ownerId: userId },
-      { vocabulary, expressions, expires: Date.now() + newExpire },
+      { title, vocabulary, expressions, expires: Date.now() + newExpire },
       { new: true }
-    );
+    )
+      .select('title vocabulary expressions createdAt')
+      .lean();
     if (!updatedPastLesson) {
       throw createError(
         400,
@@ -135,7 +145,7 @@ async function deletePastLesson(req, res, next) {
       throw createError(400, `Error deleting past lesson (${pastLessonId})`);
     }
 
-    res.status(200).json(deletedPastLesson);
+    res.status(200).json({ message: 'Successfully Deleted' });
   } catch (err) {
     next(err);
   }

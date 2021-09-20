@@ -6,11 +6,18 @@ const PastLessonSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
-    vocabulary: [String],
-    expressions: [String],
+    vocabulary: {
+      type: [String],
+    },
+    expressions: {
+      type: [String],
+    },
+    title: {
+      type: String,
+    },
     expires: {
       type: Date,
-      default: () => Date.now() + 1000 * 60 * 60 * 24 * 182,
+      default: () => Date.now() + 1000 * 60 * 60 * 24 * 182, // expires half year from creation
     },
   },
   { timestamps: true }
