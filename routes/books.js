@@ -56,9 +56,9 @@ function getBookLessons(req, res, next) {
       path: 'lessons',
       select: ['chapter', 'title'],
     })
-    .exec((err, lessons) => {
+    .exec((err, result) => {
       if (err) return next(err);
-      res.status(200).json(lessons);
+      res.status(200).json(result.lessons);
     });
 }
 

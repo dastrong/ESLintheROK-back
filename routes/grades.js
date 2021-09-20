@@ -41,9 +41,9 @@ function getGradeBooks(req, res, next) {
       path: 'books',
       select: ['publisher', 'author', 'imageURL', 'lessons'],
     })
-    .exec((err, books) => {
+    .exec((err, result) => {
       if (err) return next(err);
-      res.status(200).json(books);
+      res.status(200).json(result.books);
     });
 }
 
