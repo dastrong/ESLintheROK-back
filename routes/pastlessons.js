@@ -14,6 +14,7 @@ const nanoid = customAlphabet(alphabet, 8);
 router.get('/past-lesson', verifyToken, getUserPastLessons);
 router.post('/past-lesson', verifyToken, createPastLesson);
 router.post('/past-lesson/bulk', getPastLessonsData);
+router.put('/past-lesson/bulk/expiry', updatePastLessonsExpiry);
 router.get('/past-lesson/id/:pastLessonId', verifyIdParams, getPastLessonById);
 router.get('/past-lesson/shortId/:pastLessonShortId', getPastLessonByShortId);
 router.put(
@@ -140,6 +141,39 @@ async function getPastLessonsData(req, res, next) {
   }
 }
 
+async function updatePastLessonsExpiry(req, res, next) {
+  try {
+    const { pastLessonIds } = req.body;
+    if (!pastLessonIds) {
+      throw createError(400, 'Error getting past lessons (pastLessonIds)');
+    }
+    if (!Array.isArray(pastLessonIds)) {
+      throw createError(
+        400,
+        'Error getting past lessons (pastLessonIds should be an array)'
+      );
+    }
+    if (!pastLessonIds.every(isValidObjectId)) {
+      throw createError(
+        400,
+        'Error getting past lessons (Invalid Id Structure)'
+      );
+    }
+
+    const updatedPastLessons = await PastLesson.updateMany(
+      { _id: { $in: pastLessonIds } },
+      { expires: Date.now() + newExpire }
+    );
+    if (!updatedPastLessons.n) {
+      throw createError(400, `Error finding those past lessons`);
+    }
+
+    res.status(200).json({ message: 'Successful updated.' });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function getPastLessonById(req, res, next) {
   try {
     const { pastLessonId } = req.params;
@@ -204,7 +238,7 @@ async function updatePastLesson(req, res, next) {
     }
 
     // remove ownerId from object before returning
-    const { ownerId, __v, ...returnableLesson } = pastLesson._doc;
+    const { ownerId, __v, ...returnableLesson } = updatedPastLesson._doc;
 
     res.status(200).json(returnableLesson);
   } catch (err) {
@@ -247,7 +281,7 @@ async function updatePastLessonExpiry(req, res, next) {
       );
     }
 
-    res.status(204);
+    res.status(200).json({ message: 'Successful updated.' });
   } catch (err) {
     next(err);
   }
