@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const createError = require('http-errors');
+const { isValidObjectId } = require('mongoose');
 const { customAlphabet } = require('nanoid/async');
+
 const PastLesson = require('../models/pastlesson');
 const verifyToken = require('../middleware/verifyToken');
 const verifyIdParams = require('../middleware/verifyIdParams');
@@ -11,6 +13,7 @@ const nanoid = customAlphabet(alphabet, 8);
 
 router.get('/past-lesson', verifyToken, getUserPastLessons);
 router.post('/past-lesson', verifyToken, createPastLesson);
+router.post('/past-lesson/bulk', getPastLessonsData);
 router.get('/past-lesson/id/:pastLessonId', verifyIdParams, getPastLessonById);
 router.get('/past-lesson/shortId/:pastLessonShortId', getPastLessonByShortId);
 router.put(
@@ -94,6 +97,44 @@ async function createPastLesson(req, res, next) {
     });
 
     res.status(201).json(newPastLesson);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getPastLessonsData(req, res, next) {
+  try {
+    const { pastLessonIds } = req.body;
+    if (!pastLessonIds) {
+      throw createError(400, 'Error getting past lessons (pastLessonIds)');
+    }
+    if (!Array.isArray(pastLessonIds)) {
+      throw createError(
+        400,
+        'Error getting past lessons (pastLessonIds should be an array)'
+      );
+    }
+    if (!pastLessonIds.every(isValidObjectId)) {
+      throw createError(
+        400,
+        'Error getting past lessons (Invalid Id Structure)'
+      );
+    }
+
+    const pastLessons = await PastLesson.find({ _id: { $in: pastLessonIds } });
+    if (!pastLessons.length) {
+      throw createError(400, `Error finding those past lessons`);
+    }
+
+    // combine all the lessons data together
+    let vocabulary = [];
+    let expressions = [];
+    pastLessons.forEach(lesson => {
+      vocabulary.push(...lesson.vocabulary);
+      expressions.push(...lesson.expressions);
+    });
+
+    res.status(200).json({ vocabulary, expressions });
   } catch (err) {
     next(err);
   }
