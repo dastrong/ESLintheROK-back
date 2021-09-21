@@ -1,14 +1,18 @@
 const router = require('express').Router();
 const createError = require('http-errors');
+const { customAlphabet } = require('nanoid/async');
 const PastLesson = require('../models/pastlesson');
 const verifyToken = require('../middleware/verifyToken');
 const verifyIdParams = require('../middleware/verifyIdParams');
 
 const newExpire = 1000 * 60 * 60 * 24 * 182; // half year in ms
+const alphabet = '123456789ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnpqrstuvwxyz';
+const nanoid = customAlphabet(alphabet, 8);
 
 router.get('/past-lesson', verifyToken, getUserPastLessons);
 router.post('/past-lesson', verifyToken, createPastLesson);
-router.get('/past-lesson/:pastLessonId', verifyIdParams, getPastLesson);
+router.get('/past-lesson/id/:pastLessonId', verifyIdParams, getPastLessonById);
+router.get('/past-lesson/shortId/:pastLessonShortId', getPastLessonByShortId);
 router.put(
   '/past-lesson/:pastLessonId',
   verifyIdParams,
@@ -26,6 +30,12 @@ router.put(
   verifyIdParams,
   updatePastLessonExpiry
 );
+router.get(
+  '/past-lesson/:pastLessonId/shortId',
+  verifyIdParams,
+  verifyToken,
+  getPastLessonShortId
+);
 
 async function getUserPastLessons(req, res, next) {
   try {
@@ -38,13 +48,22 @@ async function getUserPastLessons(req, res, next) {
 
     res.status(200).json(
       pastLessons.map(
-        ({ _id, title, vocabulary, expressions, expires, createdAt }) => ({
+        ({
+          _id,
+          title,
+          vocabulary,
+          expressions,
+          expires,
+          createdAt,
+          shortId,
+        }) => ({
           _id,
           title,
           vocabularyCount: vocabulary.length,
           expressionsCount: expressions.length,
           expires,
           createdAt,
+          shortId,
         })
       )
     );
@@ -80,18 +99,37 @@ async function createPastLesson(req, res, next) {
   }
 }
 
-async function getPastLesson(req, res, next) {
+async function getPastLessonById(req, res, next) {
   try {
     const { pastLessonId } = req.params;
 
-    const pastLesson = await PastLesson.findOne({ _id: pastLessonId })
-      .select('title vocabulary expressions createdAt')
-      .lean();
+    const pastLesson = await PastLesson.findOne({ _id: pastLessonId });
     if (!pastLesson) {
       throw createError(400, `Error finding past lesson (${pastLessonId})`);
     }
 
-    res.status(200).json(pastLesson);
+    // remove ownerId from object before returning
+    const { ownerId, __v, ...returnableLesson } = pastLesson._doc;
+
+    res.status(200).json(returnableLesson);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getPastLessonByShortId(req, res, next) {
+  try {
+    const { pastLessonShortId } = req.params;
+
+    const pastLesson = await PastLesson.findOne({ shortId: pastLessonShortId });
+    if (!pastLesson) {
+      throw createError(400, `Error finding lesson (${pastLessonShortId})`);
+    }
+
+    // remove ownerId from object before returning
+    const { ownerId, __v, ...returnableLesson } = pastLesson._doc;
+
+    res.status(200).json(returnableLesson);
   } catch (err) {
     next(err);
   }
@@ -116,9 +154,7 @@ async function updatePastLesson(req, res, next) {
       { _id: pastLessonId, ownerId: userId },
       { title, vocabulary, expressions, expires: Date.now() + newExpire },
       { new: true }
-    )
-      .select('title vocabulary expressions createdAt')
-      .lean();
+    );
     if (!updatedPastLesson) {
       throw createError(
         400,
@@ -126,7 +162,10 @@ async function updatePastLesson(req, res, next) {
       );
     }
 
-    res.status(200).json(updatedPastLesson);
+    // remove ownerId from object before returning
+    const { ownerId, __v, ...returnableLesson } = pastLesson._doc;
+
+    res.status(200).json(returnableLesson);
   } catch (err) {
     next(err);
   }
@@ -167,7 +206,35 @@ async function updatePastLessonExpiry(req, res, next) {
       );
     }
 
-    res.status(200).json(updatedPastLesson);
+    res.status(204);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getPastLessonShortId(req, res, next) {
+  try {
+    const { userId } = res.locals;
+    const { pastLessonId } = req.params;
+
+    const pastLesson = await PastLesson.findOne({
+      _id: pastLessonId,
+      ownerId: userId,
+    });
+    if (!pastLesson) {
+      throw createError(
+        400,
+        `Error finding past lesson to update (${pastLessonId})`
+      );
+    }
+
+    // if there isn't a shortId, we'll need to add one
+    if (!pastLesson.shortId) {
+      pastLesson.shortId = await nanoid();
+      await pastLesson.save();
+    }
+
+    res.status(200).json({ shortId: pastLesson.shortId });
   } catch (err) {
     next(err);
   }

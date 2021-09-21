@@ -19,6 +19,9 @@ const PastLessonSchema = new mongoose.Schema(
       type: Date,
       default: () => Date.now() + 1000 * 60 * 60 * 24 * 182, // expires half year from creation
     },
+    shortId: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
